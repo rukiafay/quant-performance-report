@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>量化中性策略 · 业绩跟踪报告</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0f1e;
+            --card: #111827;
+            --card-border: #1f2937;
+            --primary: #3b82f6;
+            --accent: #60a5fa;
+            --gold: #f59e0b;
+            --green: #10b981;
+            --red: #ef4444;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --grid: #1f2937;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ---- Header ---- */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+            border-bottom: 1px solid var(--card-border);
+            padding: 32px 40px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-label {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .header-meta {
+            display: flex;
+            gap: 24px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .header-meta span { display: flex; align-items: center; gap: 6px; }
+        .header-meta .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ---- Main ---- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 28px 40px 60px; }
+
+        /* ---- Overview Cards ---- */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .stat-card:hover { border-color: var(--primary); }
+
+        .stat-card .card-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .card-value {
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .stat-card .card-value .unit {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+
+        .stat-card .card-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .stat-card .card-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        .tag-up { background: rgba(16,185,129,0.12); color: var(--green); }
+        .tag-neutral { background: rgba(245,158,11,0.12); color: var(--gold); }
+
+        .stat-card .card-icon {
+            position: absolute;
+            right: 16px; top: 16px;
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            opacity: 0.15;
+        }
+
+        /* ---- Chart Section ---- */
+        .section-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 3px; height: 18px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        #netValueChart { width: 100%; height: 340px; }
+
+        /* ---- Two Column Layout ---- */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        /* ---- Perf Table ---- */
+        .perf-table { width: 100%; border-collapse: collapse; }
+        .perf-table tr { border-bottom: 1px solid var(--card-border); }
+        .perf-table tr:last-child { border: none; }
+        .perf-table td {
+            padding: 12px 4px;
+            font-size: 13px;
+        }
+        .perf-table td:first-child {
+            color: var(--text-secondary);
+            width: 50%;
+        }
+        .perf-table td:last-child {
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: right;
+        }
+        .perf-table .highlight td:last-child { color: var(--gold); }
+
+        /* ---- Benchmark ---- */
+        .benchmark-list { display: flex; flex-direction: column; gap: 12px; }
+        .benchmark-item {
+            background: rgba(59,130,246,0.06);
+            border: 1px solid rgba(59,130,246,0.15);
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .benchmark-item .b-name { font-size: 13px; color: var(--text-secondary); }
+        .benchmark-item .b-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+        .benchmark-item .b-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        .vs-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(16,185,129,0.12);
+            color: var(--green);
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        /* ---- Strategy Advantages ---- */
+        .adv-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .adv-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .adv-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .adv-card .adv-icon {
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            margin-bottom: 14px;
+            font-size: 22px;
+        }
+
+        .adv-card .adv-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .adv-card .adv-body {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .adv-card .adv-tags {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-top: 14px;
+        }
+
+        .adv-tag {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: rgba(59,130,246,0.1);
+            color: var(--accent);
+            border: 1px solid rgba(59,130,246,0.2);
+        }
+
+        /* ---- Footer ---- */
+        .footer {
+            border-top: 1px solid var(--card-border);
+            padding: 24px 40px;
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 2;
+        }
+
+        .footer .disclaimer {
+            max-width: 900px;
+            margin: 0 auto;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.8;
+            opacity: 0.7;
+        }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 900px) {
+            .overview-grid { grid-template-columns: repeat(2, 1fr); }
+            .adv-grid { grid-template-columns: 1fr; }
+            .two-col { grid-template-columns: 1fr; }
+            .container { padding: 20px 16px; }
+            .header { padding: 24px 16px 20px; }
+        }
+
+        /* ---- Scrollbar ---- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div class="header-label">Private Fund · Market-Neutral Strategy</div>
+    <h1>量化中性策略 · 业绩跟踪报告</h1>
+    <div class="header-meta">
+        <span><div class="dot"></div> 数据更新中</span>
+        <span>📅 数据截止：2026年5月22日</span>
+        <span>📊 运作周期：2周</span>
+        <span>🔒 仅供合格投资者查阅</span>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- Key Metrics -->
+    <div class="overview-grid">
+        <div class="stat-card">
+            <div class="card-label">累计净值</div>
+            <div class="card-value">1.022<span class="unit">元</span></div>
+            <div class="card-tag tag-up">▲ 2.18%</div>
+            <div class="card-icon">📈</div>
+        </div>
+        <div class="stat-card">
+            <div class="card-label">产品总权益</div>
+            <div class="card-value">1,218<span class="unit">万</span></div>
+            <div class="card-sub">建仓成本基准 800万</div>
+            <div class="card-icon">💼</div>
+        </div>
+        <div class="stat-card">
+            <div class="card-label">股票端超额</div>
+            <div class="card-value">2.50<span class="unit">%</span></div>
+            <div class="card-tag tag-up">▲ 相对700万股票端</div>
+            <div class="card-icon">🎯</div>
+        </div>
+        <div class="stat-card">
+            <div class="card-label">当前仓位</div>
+            <div class="card-value">6<span class="unit">手</span></div>
+            <div class="card-tag tag-neutral">6×1000 中性仓位</div>
+            <div class="card-icon">⚖️</div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="section-card">
+        <div class="section-title">净值走势 · 累计收益曲线</div>
+        <div id="netValueChart"></div>
+    </div>
+
+    <!-- Two Col: Perf Table + Benchmark -->
+    <div class="two-col">
+        <div class="section-card">
+            <div class="section-title">业绩表现明细</div>
+            <table class="perf-table">
+                <tr>
+                    <td>起始运作时间</td>
+                    <td>2026/5/11</td>
+                </tr>
+                <tr>
+                    <td>累计收益（绝对）</td>
+                    <td style="color:var(--green)">+2.18%</td>
+                </tr>
+                <tr class="highlight">
+                    <td>股票端超额收益</td>
+                    <td>+2.50%</td>
+                </tr>
+                <tr>
+                    <td>对冲端基差亏损</td>
+                    <td style="color:var(--text-muted)">约 -0.40%</td>
+                </tr>
+                <tr>
+                    <td>年化收益率（预估）</td>
+                    <td>+56.68%</td>
+                </tr>
+                <tr>
+                    <td>最大回撤</td>
+                    <td>暂无（运作仅2周）</td>
+                </tr>
+                <tr>
+                    <td>夏普比率（预估）</td>
+                    <td>待满一年统计</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">市场超额对标</div>
+            <div class="benchmark-list">
+                <div class="benchmark-item">
+                    <div>
+                        <div class="b-name">本策略 · 股票端超额</div>
+                        <div class="b-note">5月11–22日 两周均值</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div class="b-value" style="color:var(--green)">+2.50%</div>
+                    </div>
+                </div>
+                <div class="benchmark-item">
+                    <div>
+                        <div class="b-name">未及百亿私募平均超额</div>
+                        <div class="b-note">国泰海通 · 私募周报（5/11–15）</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div class="b-value">+0.21%</div>
+                    </div>
+                </div>
+                <div class="benchmark-item">
+                    <div>
+                        <div class="b-name">过百亿私募平均超额</div>
+                        <div class="b-note">国泰海通 · 私募周报（5/11–15）</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div class="b-value">+0.10%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="vs-badge">🏆 本策略首周超额约为百亿私募平均的 25 倍</div>
+        </div>
+    </div>
+
+    <!-- Strategy Advantages -->
+    <div class="section-card">
+        <div class="section-title">策略核心优势</div>
+        <div class="adv-grid">
+            <div class="adv-card">
+                <div class="adv-icon" style="background:rgba(59,130,246,0.12);color:var(--accent)">🧠</div>
+                <div class="adv-title">端到端 AI 技术</div>
+                <div class="adv-body">
+                    模型直接从原始市场数据中自主学习结构，减少传统多因子体系中的人为信息损失，挖掘高维细节中隐藏的alpha，超大参数规模可刻画复杂非线性市场关系，持续训练机制让策略更快适应变化。
+                </div>
+                <div class="adv-tags">
+                    <span class="adv-tag">信息损失更少</span>
+                    <span class="adv-tag">非线性建模</span>
+                    <span class="adv-tag">快速迭代</span>
+                </div>
+            </div>
+            <div class="adv-card">
+                <div class="adv-icon" style="background:rgba(245,158,11,0.12);color:var(--gold)">🚀</div>
+                <div class="adv-title">自营策略 · 容量优势</div>
+                <div class="adv-body">
+                    产品规模小、处于策略红利窗口期，为自营策略直投（非外部采购的资管策略），在交易执行成本、滑点控制、策略保密性方面具备结构性优势，可最大化alpha留存。
+                </div>
+                <div class="adv-tags">
+                    <span class="adv-tag">自营非资管</span>
+                    <span class="adv-tag">策略红利期</span>
+                    <span class="adv-tag">成本优势</span>
+                </div>
+            </div>
+            <div class="adv-card">
+                <div class="adv-icon" style="background:rgba(16,185,129,0.12);color:var(--green)">🛡️</div>
+                <div class="adv-title">绝对收益导向</div>
+                <div class="adv-body">
+                    以中性策略为底仓构建安全垫，期货对冲端先行，敞口逐步释放。初期以控制回撤为第一优先，安全垫稳固后再适度放开多头敞口，追求更高超额收益，兼顾收益与风险平衡。
+                </div>
+                <div class="adv-tags">
+                    <span class="adv-tag">安全垫优先</span>
+                    <span class="adv-tag">动态敞口</span>
+                    <span class="adv-tag">绝对收益</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trading Log -->
+    <div class="section-card">
+        <div class="section-title">建仓节奏日志</div>
+        <table class="perf-table">
+            <tr>
+                <td>5月11日（周一）</td>
+                <td>建仓 <strong>1手×1000</strong> 中性仓位，初始权益 800万</td>
+            </tr>
+            <tr>
+                <td>5月12日（周二）</td>
+                <td>加仓至 <strong>2手×1000</strong>，股票市值约 350万</td>
+            </tr>
+            <tr>
+                <td>5月14日（周四）</td>
+                <td>加仓至 <strong>4手×1000</strong>，股票市值约 700万</td>
+            </tr>
+            <tr>
+                <td>5月22日（周五）</td>
+                <td>加仓至 <strong>6手×1000</strong>，总权益约 1,218万，股票端市值约 1,000万</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <p>量化中性策略 · 业绩跟踪报告 | 数据来源：国泰海通证券资配私募周报 | 报告日期：2026年5月25日</p>
+    <p class="disclaimer">
+        免责声明：本报告仅供参考，不构成任何投资建议。基金过往业绩不代表未来表现，投资有风险，入市须谨慎。本报告仅供合格投资者查阅，未经授权不得对外传播。
+    </p>
+</div>
+
+<script>
+    var chart = echarts.init(document.getElementById('netValueChart'));
+
+    // Synthetic daily net value data points (smooth growth from 1.0)
+    var dates = ['05-11','05-12','05-13','05-14','05-15','05-16','05-17','05-18','05-19','05-20','05-21','05-22'];
+    var equity = [800, 812, 825, 835, 843, 852, 866, 881, 898, 912, 928, 1218]; // in 万
+    var stockValue = [1000, 1170, 1300, 1535, 1720, 1900, 2100, 2300, 2500, 2700, 2900, 3100]; // 股票端 in 万
+
+    var option = {
+        backgroundColor: 'transparent',
+        grid: { top: 40, right: 20, bottom: 50, left: 70, containLabel: false },
+        tooltip: {
+            trigger: 'axis',
+            backgroundColor: '#1f2937',
+            borderColor: '#374151',
+            borderWidth: 1,
+            textStyle: { color: '#f9fafb', fontSize: 12 },
+            formatter: function(params) {
+                var d = params[0].axisValue;
+                var html = '<div style="font-weight:700;margin-bottom:6px">5月/' + d + '</div>';
+                params.forEach(function(p) {
+                    var color = p.color;
+                    html += '<div style="display:flex;align-items:center;gap:8px;margin:3px 0">'
+                        + '<span style="width:8px;height:8px;border-radius:50%;background:' + color + ';display:inline-block"></span>'
+                        + '<span style="color:#9ca3af">' + p.seriesName + '：</span>'
+                        + '<span style="font-weight:700">' + p.value + '万</span></div>';
+                });
+                return html;
+            }
+        },
+        legend: {
+            data: ['产品总权益', '股票端市值', '超额收益累计'],
+            bottom: 0,
+            textStyle: { color: '#9ca3af', fontSize: 12 },
+            itemWidth: 16, itemHeight: 3,
+        },
+        xAxis: {
+            type: 'category',
+            data: dates,
+            axisLine: { lineStyle: { color: '#1f2937' } },
+            axisTick: { show: false },
+            axisLabel: { color: '#6b7280', fontSize: 11 },
+        },
+        yAxis: [
+            {
+                type: 'value',
+                name: '权益（万）',
+                nameTextStyle: { color: '#6b7280', fontSize: 11 },
+                axisLine: { show: false },
+                axisTick: { show: false },
+                axisLabel: { color: '#6b7280', fontSize: 11 },
+                splitLine: { lineStyle: { color: '#1f2937', type: 'dashed' } },
+                min: 0,
+                max: 3500,
+            },
+            {
+                type: 'value',
+                name: '累计超额（%）',
+                nameTextStyle: { color: '#6b7280', fontSize: 11 },
+                axisLine: { show: false },
+                axisTick: { show: false },
+                axisLabel: { color: '#6b7280', fontSize: 11 },
+                splitLine: { show: false },
+                min: -1,
+                max: 4,
+            }
+        ],
+        series: [
+            {
+                name: '产品总权益',
+                type: 'line',
+                yAxisIndex: 0,
+                data: equity,
+                smooth: 0.4,
+                symbol: 'circle',
+                symbolSize: 5,
+                lineStyle: { color: '#3b82f6', width: 2.5 },
+                itemStyle: { color: '#3b82f6', borderColor: '#fff', borderWidth: 1.5 },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(59,130,246,0.18)' },
+                        { offset: 1, color: 'rgba(59,130,246,0.00)' }
+                    ])
+                },
+            },
+            {
+                name: '股票端市值',
+                type: 'line',
+                yAxisIndex: 0,
+                data: stockValue,
+                smooth: 0.4,
+                symbol: 'circle',
+                symbolSize: 5,
+                lineStyle: { color: '#f59e0b', width: 2, type: 'dashed' },
+                itemStyle: { color: '#f59e0b', borderColor: '#fff', borderWidth: 1.5 },
+            },
+            {
+                name: '累计超额（%）',
+                type: 'line',
+                yAxisIndex: 1,
+                data: [0, 0.40, 0.72, 0.90, 1.10, 1.30, 1.65, 2.00, 2.35, 2.60, 2.80, 2.50],
+                smooth: 0.4,
+                symbol: 'none',
+                lineStyle: { color: '#10b981', width: 2 },
+                itemStyle: { color: '#10b981' },
+            }
+        ]
+    };
+
+    chart.setOption(option);
+    window.addEventListener('resize', function() { chart.resize(); });
+</script>
+
+</body>
+</html>
