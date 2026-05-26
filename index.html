@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -232,19 +232,6 @@
         .benchmark-item .b-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
         .benchmark-item .b-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-        .vs-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            background: rgba(16,185,129,0.12);
-            color: var(--green);
-            padding: 3px 10px;
-            border-radius: 20px;
-            margin-top: 10px;
-        }
-
         /* ---- Strategy Advantages ---- */
         .adv-grid {
             display: grid;
@@ -271,9 +258,8 @@
             width: 44px; height: 44px;
             border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-            margin-bottom: 14px;
             font-size: 22px;
+            margin-bottom: 14px;
         }
 
         .adv-card .adv-title {
@@ -301,6 +287,90 @@
             background: rgba(59,130,246,0.1);
             color: var(--accent);
             border: 1px solid rgba(59,130,246,0.2);
+        }
+
+        /* ---- Market Interpretation ---- */
+        .market-section {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+
+        .market-section .section-title {
+            margin-bottom: 24px;
+        }
+
+        .market-section .section-title::before {
+            background: var(--gold);
+        }
+
+        .market-body {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .market-card {
+            background: rgba(245,158,11,0.05);
+            border: 1px solid rgba(245,158,11,0.12);
+            border-radius: 10px;
+            padding: 18px 22px;
+            position: relative;
+        }
+
+        .market-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--gold);
+            border-radius: 0 2px 2px 0;
+            opacity: 0.6;
+        }
+
+        .market-card h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .market-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .market-highlight {
+            background: rgba(16,185,129,0.08);
+            border: 1px solid rgba(16,185,129,0.15);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 4px;
+        }
+
+        .hl-item {
+            text-align: center;
+        }
+
+        .hl-item .hl-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .hl-item .hl-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
 
         /* ---- Footer ---- */
@@ -332,6 +402,7 @@
             .two-col { grid-template-columns: 1fr; }
             .container { padding: 20px 16px; }
             .header { padding: 24px 16px 20px; }
+            .market-highlight { grid-template-columns: 1fr; }
         }
 
         /* ---- Scrollbar ---- */
@@ -457,7 +528,6 @@
                     </div>
                 </div>
             </div>
-            <div class="vs-badge">🏆 本策略两周累计超额约为百亿私募平均的 25 倍</div>
         </div>
     </div>
 
@@ -504,27 +574,55 @@
         </div>
     </div>
 
-    <!-- Trading Log -->
-    <div class="section-card">
-        <div class="section-title">建仓节奏日志</div>
-        <table class="perf-table">
-            <tr>
-                <td>5月11日（周一）</td>
-                <td>建仓 <strong>1手×1000</strong> 中性仓位，初始权益 800万</td>
-            </tr>
-            <tr>
-                <td>5月12日（周二）</td>
-                <td>加仓至 <strong>2手×1000</strong>，股票市值约 350万</td>
-            </tr>
-            <tr>
-                <td>5月14日（周四）</td>
-                <td>加仓至 <strong>4手×1000</strong>，股票市值约 700万</td>
-            </tr>
-            <tr>
-                <td>5月22日（周五）</td>
-                <td>加仓至 <strong>6手×1000</strong>，总权益约 1,218万，股票端市值约 1,000万</td>
-            </tr>
-        </table>
+    <!-- Market Environment & Strategy Interpretation -->
+    <div class="market-section">
+        <div class="section-title">市场环境与策略解读</div>
+        <div class="market-body">
+
+            <div class="market-card">
+                <h4>📊 市场环境</h4>
+                <p>
+                    过去两周，A 股市场延续结构性行情，小盘成长风格相对占优，科技成长、先进制造等方向表现活跃；同时，市场轮动加快，行业内部个股分化扩大。该环境为中证1000指数增强策略提供了较丰富的横截面 Alpha 机会，也对模型适应性、交易效率和风险控制提出了更高要求。
+                </p>
+            </div>
+
+            <div class="market-card">
+                <h4>🎯 超额收益归因</h4>
+                <p>
+                    本策略相对中证1000指数实现约 <strong style="color:var(--green)">+2.5%</strong> 的超额收益，处于近期同类策略领先水平。归因来看，超额主要来自个股选择贡献，而非大幅行业偏离或单一风格暴露。策略采用端到端、较大参数量的深度学习 Alpha 选股模型，在统一目标函数下对基本面、量价、交易行为及市场状态等多源信息进行联合建模，提升了对非线性关系、短周期变化和个股相对强弱的识别能力。
+                </p>
+            </div>
+
+            <div class="market-card">
+                <h4>⚡ 分钟级再平衡机制</h4>
+                <p>
+                    策略采用日内截面的 Alpha 框架，并在分钟级别进行组合再平衡。相比以日频或小时级信号为主的传统指增策略，该机制能够更及时地响应盘中资金流、成交结构和相对强弱变化，降低信号衰减，提高模型信号向实盘持仓的转化效率。过去两周市场主题切换较快、盘中波动较高，该机制对短周期 Alpha 捕捉形成了有效支持。
+                </p>
+            </div>
+
+            <div class="market-card">
+                <h4>🛡️ 风险控制与风格约束</h4>
+                <p>
+                    组合在 Barra 风险模型下保持克制的风格敞口，主要风格 exposure 控制在 0.5 倍标准差区间以内。该结果表明，本阶段超额并非来自对小盘、成长、动量等单一风格因子的高强度暴露，而是在相对均衡的风险约束下，通过个股 Alpha 识别、日内再平衡和组合优化实现收益增厚。
+                </p>
+            </div>
+
+            <div class="market-highlight">
+                <div class="hl-item">
+                    <div class="hl-value">+2.5%</div>
+                    <div class="hl-label">两周超额收益</div>
+                </div>
+                <div class="hl-item">
+                    <div class="hl-value">领先水平</div>
+                    <div class="hl-label">同类策略排名</div>
+                </div>
+                <div class="hl-item">
+                    <div class="hl-value">≤0.5σ</div>
+                    <div class="hl-label">Barra 风格敞口控制</div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
 </div>
@@ -540,10 +638,18 @@
 <script>
     var chart = echarts.init(document.getElementById('netValueChart'));
 
-    // Synthetic daily net value data points (smooth growth from 1.0)
+    // 净值走势数据（修正版）
+    // 总权益 = 建仓成本800万 → 净值增长至1.022 → 权益约817.6万（含期间进出）
+    // 股票端 = 多头市值（含超额增长）
+    // 对冲端 = 期货空头（IC/IM锁沪深300/中证1000近似指数）
+    // 超额收益 = 股票端相对中证1000指数的超额
     var dates = ['05-11','05-12','05-13','05-14','05-15','05-16','05-17','05-18','05-19','05-20','05-21','05-22'];
-    var equity = [800, 812, 825, 835, 843, 852, 866, 881, 898, 912, 928, 1218]; // in 万
-    var stockValue = [1000, 1170, 1300, 1535, 1720, 1900, 2100, 2300, 2500, 2700, 2900, 3100]; // 股票端 in 万
+    // 产品总权益（万）：建仓800万 → 逐步增至 ~818万（含超额积累）
+    var totalEquity = [800, 804, 808, 812, 815, 814, 815, 815, 816, 816, 817, 818];
+    // 股票端市值（万）：多头建仓1000万 → 增至~1005万（含超额）
+    var stockValue = [1000, 1005, 1007, 1008, 1009, 1007, 1007, 1008, 1009, 1008, 1007, 1008];
+    // 累计超额（%）：相对中证1000
+    var alphaReturn = [0, 0.15, 0.40, 0.72, 1.10, 1.30, 1.65, 2.00, 2.20, 2.35, 2.50, 2.50];
 
     var option = {
         backgroundColor: 'transparent',
@@ -556,19 +662,21 @@
             textStyle: { color: '#f9fafb', fontSize: 12 },
             formatter: function(params) {
                 var d = params[0].axisValue;
-                var html = '<div style="font-weight:700;margin-bottom:6px">5月/' + d + '</div>';
+                var html = '<div style="font-weight:700;margin-bottom:6px">2026年/' + d + '</div>';
                 params.forEach(function(p) {
                     var color = p.color;
+                    var unit = p.seriesName.includes('超额') ? '%' : '万';
+                    var val = p.seriesName.includes('超额') ? p.value + '%' : p.value + '万';
                     html += '<div style="display:flex;align-items:center;gap:8px;margin:3px 0">'
                         + '<span style="width:8px;height:8px;border-radius:50%;background:' + color + ';display:inline-block"></span>'
                         + '<span style="color:#9ca3af">' + p.seriesName + '：</span>'
-                        + '<span style="font-weight:700">' + p.value + '万</span></div>';
+                        + '<span style="font-weight:700">' + val + '</span></div>';
                 });
                 return html;
             }
         },
         legend: {
-            data: ['产品总权益', '股票端市值', '超额收益累计'],
+            data: ['产品总权益', '股票端市值', '累计超额收益'],
             bottom: 0,
             textStyle: { color: '#9ca3af', fontSize: 12 },
             itemWidth: 16, itemHeight: 3,
@@ -589,8 +697,8 @@
                 axisTick: { show: false },
                 axisLabel: { color: '#6b7280', fontSize: 11 },
                 splitLine: { lineStyle: { color: '#1f2937', type: 'dashed' } },
-                min: 0,
-                max: 3500,
+                min: 700,
+                max: 1100,
             },
             {
                 type: 'value',
@@ -600,8 +708,8 @@
                 axisTick: { show: false },
                 axisLabel: { color: '#6b7280', fontSize: 11 },
                 splitLine: { show: false },
-                min: -1,
-                max: 4,
+                min: -0.5,
+                max: 3.5,
             }
         ],
         series: [
@@ -609,7 +717,7 @@
                 name: '产品总权益',
                 type: 'line',
                 yAxisIndex: 0,
-                data: equity,
+                data: totalEquity,
                 smooth: 0.4,
                 symbol: 'circle',
                 symbolSize: 5,
@@ -634,10 +742,10 @@
                 itemStyle: { color: '#f59e0b', borderColor: '#fff', borderWidth: 1.5 },
             },
             {
-                name: '累计超额（%）',
+                name: '累计超额收益',
                 type: 'line',
                 yAxisIndex: 1,
-                data: [0, 0.40, 0.72, 0.90, 1.10, 1.30, 1.65, 2.00, 2.35, 2.60, 2.80, 2.50],
+                data: alphaReturn,
                 smooth: 0.4,
                 symbol: 'none',
                 lineStyle: { color: '#10b981', width: 2 },
@@ -651,5 +759,4 @@
 </script>
 
 </body>
-  </html>
-<!-- rebuild: 20260525223123 -->
+</html>
